@@ -8,13 +8,19 @@ public class LoginResponse {
     private String username;
     private String email;
     private String role;
+    private String message;
 
+    // Constructor existente
     public LoginResponse(String token, Long id, String username, String email, String role) {
         this.token = token;
         this.id = id;
         this.username = username;
         this.email = email;
         this.role = role;
+    }
+    public LoginResponse(String token, String message) {
+        this.token = token;
+        this.message = message;
     }
 
     // Getters y setters
@@ -64,5 +70,11 @@ public class LoginResponse {
 
     public void setRole(String role) {
         this.role = role;
+    }
+    public String getMessage() {
+        return message;
+    }
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

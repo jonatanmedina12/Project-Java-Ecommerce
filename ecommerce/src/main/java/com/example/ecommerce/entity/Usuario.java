@@ -2,6 +2,7 @@ package com.example.ecommerce.entity;
 import  jakarta.persistence.*;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "usuarios")
@@ -15,8 +16,8 @@ public class Usuario {
     private  String password;
     private  String email;
     private  boolean activo;
-    private Date created_on;
-    private Date update_on;
+    private LocalDateTime created_on;
+    private LocalDateTime update_on;
     private  String foto;
     @Enumerated(EnumType.STRING)
     private Rol rol;
@@ -34,6 +35,8 @@ public class Usuario {
     public void setActivo(boolean activo) { this.activo = activo; }
     public Rol getRol() { return rol; }
     public void setRol(Rol rol) { this.rol = rol; }
+    public LocalDateTime getCreated_on() {return created_on ;}
+    public void setCreated_on(LocalDateTime created_on) { this.created_on = created_on; }
 
 
 
