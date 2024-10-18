@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,8 +34,10 @@ public class UsuarioService {
         if (usuarioRepository.existsByEmail(usuarioDTO.getEmail())) {
             throw new RuntimeException("El email ya está registrado");
         }
+        LocalDateTime fechaHoraActual = LocalDateTime.now();
 
         Usuario usuario = new Usuario();
+        usuario.setCreated_on(fechaHoraActual);
         usuario.setUsername(usuarioDTO.getUsername());
         usuario.setEmail(usuarioDTO.getEmail());
         usuario.setPassword(passwordEncoder.encode(usuarioDTO.getPassword()));
