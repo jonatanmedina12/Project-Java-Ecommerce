@@ -19,6 +19,8 @@ public class Usuario {
     private LocalDateTime created_on;
     private LocalDateTime update_on;
     private  String foto;
+    private LocalDateTime last_login;
+    private boolean activoLogin;
     @Enumerated(EnumType.STRING)
     private Rol rol;
 
@@ -39,5 +41,37 @@ public class Usuario {
     public void setCreated_on(LocalDateTime created_on) { this.created_on = created_on; }
 
 
+    public LocalDateTime getLast_login() {
+        return last_login;
+    }
 
+    public void setLast_login(LocalDateTime last_login) {
+        this.last_login = last_login;
+    }
+
+
+    public LocalDateTime getUpdate_on() {
+        return update_on;
+    }
+
+    public void setUpdate_on(LocalDateTime update_on) {
+        this.update_on = update_on;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
+    }
+
+
+    public boolean isActivoLogin() {
+        return activoLogin;
+    }
+
+    public void setActivoLogin(boolean activoLogin) {
+        this.activoLogin = activoLogin;
+    }
 }
