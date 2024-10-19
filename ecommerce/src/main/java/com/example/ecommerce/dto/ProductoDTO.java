@@ -10,8 +10,6 @@ public class ProductoDTO {
     private BigDecimal precio;
     private boolean activo;
 
-    // Constructores, getters y setters
-    public ProductoDTO() {}
 
     public ProductoDTO(Long id, String nombre, String descripcion, BigDecimal precio, boolean activo) {
         this.id = id;

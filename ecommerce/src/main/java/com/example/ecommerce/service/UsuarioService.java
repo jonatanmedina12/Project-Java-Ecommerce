@@ -1,10 +1,13 @@
 package com.example.ecommerce.service;
 
+import com.example.ecommerce.controller.AuthController;
 import com.example.ecommerce.dto.UsuarioDTO;
 import com.example.ecommerce.entity.Rol;
 import com.example.ecommerce.entity.Usuario;
 import com.example.ecommerce.repository.OrdenRepository;
 import com.example.ecommerce.repository.UsuarioRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class UsuarioService {
+    private static final Logger logger = LoggerFactory.getLogger(UsuarioService.class);
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -46,6 +50,20 @@ public class UsuarioService {
 
         usuario = usuarioRepository.save(usuario);
         return convertToDTO(usuario);
+    }
+
+    @Transactional
+    public Usuario loginUsuarioDTO(String username) {
+
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        LocalDateTime fechaHoraActual = LocalDateTime.now();
+        logger.info("Validando para el usuario: " + usuario.getUsername());
+
+        usuario.setLast_login(fechaHoraActual);
+        usuario.setActivoLogin(true);
+        usuario = usuarioRepository.save(usuario);
+        return usuario;
     }
 
     @Transactional(readOnly = true)
@@ -120,7 +138,7 @@ public class UsuarioService {
         dto.setEmail(usuario.getEmail());
         dto.setActivo(usuario.isActivo());
         dto.setRol(usuario.getRol().name());
-        // No incluimos la contraseña por razones de seguridad
+
         return dto;
     }
 }
