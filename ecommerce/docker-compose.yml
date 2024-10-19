@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:sqlserver://192.168.1.42:1433;databaseName=TareasDb;encrypt=true;trustServerCertificate=true
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: LionTec**
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: ecommerce
+      MYSQL_ROOT_PASSWORD: LionTec**
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:

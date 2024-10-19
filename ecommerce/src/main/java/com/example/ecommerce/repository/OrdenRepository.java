@@ -10,8 +10,8 @@ import java.util.List;
 @Repository
 public interface OrdenRepository  extends JpaRepository<Orden, Long> {
 
-    @Query("SELECT o FROM Orden o WHERE o.fecha BETWEEN :startDate AND :endDate")
-    List<Orden> findOrdersInDateRange(LocalDateTime startDate, LocalDateTime endDate);
+    List<Orden> findByUsuarioId(Long usuarioId);
+    List<Orden> findByFechaBetween(LocalDateTime fechaInicio, LocalDateTime fechaFin);
 
     @Query("SELECT o.usuario.id, COUNT(o) as orderCount FROM Orden o GROUP BY o.usuario.id ORDER BY orderCount DESC")
     List<Object[]> findTopCustomers();

@@ -24,7 +24,9 @@ public class Orden {
     private BigDecimal total;
     private BigDecimal descuento;
 
-    // Getters y setters
+    @Enumerated(EnumType.STRING)
+    private EstadoOrden estado;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Usuario getUsuario() { return usuario; }
@@ -37,7 +39,12 @@ public class Orden {
     public void setTotal(BigDecimal total) { this.total = total; }
     public BigDecimal getDescuento() { return descuento; }
     public void setDescuento(BigDecimal descuento) { this.descuento = descuento; }
+    public EstadoOrden getEstado() { return estado; }
+    public void setEstado(EstadoOrden estado) { this.estado = estado; }
 
+    public enum EstadoOrden {
+        PENDIENTE, PROCESANDO, ENVIADA, ENTREGADA, CANCELADA
+    }
 
 
 }
