@@ -91,6 +91,106 @@ src
 
 Ejecuta `mvn test` para correr las pruebas unitarias.
 
+## Uso de Docker
+
+Este proyecto está configurado para ser ejecutado en un contenedor Docker. A continuación, se detallan los pasos para construir y ejecutar la aplicación usando Docker.
+
+### Prerequisitos
+
+- Docker instalado en tu sistema. Puedes descargarlo de [Docker's official website](https://www.docker.com/get-started).
+
+### Dockerfile
+
+El proyecto incluye un Dockerfile en la raíz del directorio. Este archivo define cómo se construirá la imagen Docker de la aplicación.
+
+```dockerfile
+# Usa una imagen base con Java 17
+FROM openjdk:17-jdk-slim
+
+# Directorio de trabajo en el contenedor
+WORKDIR /app
+
+# Copia el archivo JAR de tu aplicación al contenedor
+COPY target/*.jar app.jar
+
+# Expone el puerto en el que tu aplicación escucha
+EXPOSE 8080
+
+# Comando para ejecutar la aplicación
+ENTRYPOINT ["java","-jar","/app/app.jar"]
+```
+
+### Construir la imagen Docker
+
+Para construir la imagen Docker de tu aplicación, ejecuta el siguiente comando en la raíz de tu proyecto:
+
+```bash
+docker build -t ecommerce-app .
+```
+
+Este comando construirá una imagen Docker con el nombre `ecommerce-app`.
+
+### Ejecutar el contenedor
+
+Una vez que la imagen esté construida, puedes ejecutar la aplicación en un contenedor con el siguiente comando:
+
+```bash
+docker run -p 8080:8080 ecommerce-app
+```
+
+Esto iniciará la aplicación y la hará accesible en `http://localhost:8080`.
+
+### Docker Compose
+
+
+Para una configuración más compleja que incluya servicios adicionales como una base de datos, puedes usar Docker Compose. Aquí tienes un ejemplo de `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/ecommerce?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: rootpassword
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: ecommerce
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
+```
+
+Para ejecutar la aplicación con Docker Compose:
+
+```bash
+mvn clean install -U
+
+mvn clean package -DskipTests -X
+
+docker-compose up --build
+
+```
+
+Este comando construirá la imagen de la aplicación (si es necesario) e iniciará tanto la aplicación como la base de datos MySQL.
+
+### Notas adicionales
+
+- Asegúrate de que tu aplicación esté configurada para usar las variables de entorno definidas en el `docker-compose.yml` para la conexión a la base de datos.
+- Para entornos de producción, considera usar secretos de Docker para manejar información sensible como contraseñas.
+- Ajusta la configuración de Docker y Docker Compose según las necesidades específicas de tu entorno y aplicación.
+
 
 ## Licencia
 

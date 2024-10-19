@@ -30,11 +30,9 @@ public class InventarioService {
 
     @Transactional(readOnly = true)
     public InventarioDTO obtenerInventarioPorProductoId(Long productoId) {
-        Inventario inventario = inventarioRepository.findByProductoId(productoId);
-        if (inventario == null) {
-            throw new RuntimeException("Inventario no encontrado para el producto ID: " + productoId);
-        }
-        return convertirADTO(inventario);
+        return inventarioRepository.findByProductoId(productoId)
+                .map(this::convertirADTO)
+                .orElseThrow(() -> new RuntimeException("Inventario no encontrado para el producto ID: " + productoId));
     }
 
     @Transactional
@@ -52,31 +50,27 @@ public class InventarioService {
 
     @Transactional
     public InventarioDTO actualizarInventario(Long productoId, InventarioDTO inventarioDTO) {
-        Inventario inventario = inventarioRepository.findByProductoId(productoId);
-        if (inventario == null) {
-            throw new RuntimeException("Inventario no encontrado para el producto ID: " + productoId);
-        }
+        Inventario inventario = inventarioRepository.findByProductoId(productoId)
+                .orElseThrow(() -> new RuntimeException("Inventario no encontrado para el producto ID: " + productoId));
 
         inventario.setCantidad(inventarioDTO.getCantidad());
         inventario = inventarioRepository.save(inventario);
         return convertirADTO(inventario);
     }
 
+
     @Transactional
     public void eliminarInventario(Long productoId) {
-        Inventario inventario = inventarioRepository.findByProductoId(productoId);
-        if (inventario == null) {
-            throw new RuntimeException("Inventario no encontrado para el producto ID: " + productoId);
-        }
+        Inventario inventario = inventarioRepository.findByProductoId(productoId)
+                .orElseThrow(() -> new RuntimeException("Inventario no encontrado para el producto ID: " + productoId));
         inventarioRepository.delete(inventario);
     }
 
+
     @Transactional
     public boolean actualizarStock(Long productoId, int cantidad) {
-        Inventario inventario = inventarioRepository.findByProductoId(productoId);
-        if (inventario == null) {
-            throw new RuntimeException("Inventario no encontrado para el producto ID: " + productoId);
-        }
+        Inventario inventario = inventarioRepository.findByProductoId(productoId)
+                .orElseThrow(() -> new RuntimeException("Inventario no encontrado para el producto ID: " + productoId));
 
         if (inventario.getCantidad() + cantidad < 0) {
             return false; // No hay suficiente stock
@@ -89,12 +83,9 @@ public class InventarioService {
 
     @Transactional(readOnly = true)
     public boolean verificarDisponibilidad(Long productoId, int cantidadRequerida) {
-        Inventario inventario = inventarioRepository.findByProductoId(productoId);
-        if (inventario == null) {
-            throw new RuntimeException("Inventario no encontrado para el producto ID: " + productoId);
-        }
-
-        return inventario.getCantidad() >= cantidadRequerida;
+        return inventarioRepository.findByProductoId(productoId)
+                .map(inventario -> inventario.getCantidad() >= cantidadRequerida)
+                .orElseThrow(() -> new RuntimeException("Inventario no encontrado para el producto ID: " + productoId));
     }
 
     private InventarioDTO convertirADTO(Inventario inventario) {
