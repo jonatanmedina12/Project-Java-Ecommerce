@@ -1,7 +1,8 @@
 package com.example.ecommerce.service;
 
-import com.example.ecommerce.controller.AuthController;
+import com.example.ecommerce.dto.ResetPasswordDTO;
 import com.example.ecommerce.dto.UsuarioDTO;
+import com.example.ecommerce.dto.ValidarEmail;
 import com.example.ecommerce.entity.Rol;
 import com.example.ecommerce.entity.Usuario;
 import com.example.ecommerce.repository.OrdenRepository;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.ecommerce.exception.UserValidationException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,12 +34,22 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioDTO crearUsuario(UsuarioDTO usuarioDTO) {
+        if (usuarioDTO.getUsername() == null || usuarioDTO.getUsername().trim().isEmpty()) {
+            throw new UserValidationException("El nombre de usuario no puede estar vacío", "username");
+        }
+        if (usuarioDTO.getEmail() == null || usuarioDTO.getEmail().trim().isEmpty()) {
+            throw new UserValidationException("El email no puede estar vacío", "email");
+        }
+        if (usuarioDTO.getPassword() == null || usuarioDTO.getPassword().trim().isEmpty()) {
+            throw new UserValidationException("La contraseña no puede estar vacía", "password");
+        }
         if (usuarioRepository.existsByUsername(usuarioDTO.getUsername())) {
-            throw new RuntimeException("El nombre de usuario ya existe");
+            throw new UserValidationException("El nombre de usuario ya existe", "username");
         }
         if (usuarioRepository.existsByEmail(usuarioDTO.getEmail())) {
-            throw new RuntimeException("El email ya está registrado");
+            throw new UserValidationException("El email ya está registrado", "email");
         }
+
         LocalDateTime fechaHoraActual = LocalDateTime.now();
 
         Usuario usuario = new Usuario();
@@ -53,17 +65,46 @@ public class UsuarioService {
     }
 
     @Transactional
-    public Usuario loginUsuarioDTO(String username) {
+    public void inciarSesion(String username) {
 
         Usuario usuario = usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         LocalDateTime fechaHoraActual = LocalDateTime.now();
-        logger.info("Validando para el usuario: " + usuario.getUsername());
+        logger.info("Validando para el usuario1: " + usuario.getUsername());
 
         usuario.setLast_login(fechaHoraActual);
         usuario.setActivoLogin(true);
-        usuario = usuarioRepository.save(usuario);
-        return usuario;
+        usuarioRepository.save(usuario);
+    }
+    @Transactional
+    public void cerrarSesion(String username) {
+
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        LocalDateTime fechaHoraActual = LocalDateTime.now();
+        logger.info("Validando para el usuario2: " + usuario.getUsername());
+
+        usuario.setLast_login(fechaHoraActual);
+        usuario.setActivoLogin(false);
+        usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public void cambiarContrasena(ResetPasswordDTO resetPasswordDTO) {
+
+        Usuario usuario = usuarioRepository.findByEmail(resetPasswordDTO.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        LocalDateTime fechaHoraActual = LocalDateTime.now();
+        logger.info("Validando para el usuario: " + usuario.getUsername());
+
+        usuario.setPassword(passwordEncoder.encode(resetPasswordDTO.getPassword()));
+        usuario.setUpdate_on(fechaHoraActual);
+        usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public boolean validarEmail(ValidarEmail validarEmail) {
+        return usuarioRepository.existsByEmail(validarEmail.getEmail());
     }
 
     @Transactional(readOnly = true)
@@ -73,6 +114,12 @@ public class UsuarioService {
         return convertToDTO(usuario);
     }
 
+    @Transactional
+    public Usuario obtenerUsuarioEmail(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Correo no encontrado"));
+        return usuario;
+    }
     @Transactional(readOnly = true)
     public List<UsuarioDTO> obtenerTodosUsuarios() {
         return usuarioRepository.findAll().stream()

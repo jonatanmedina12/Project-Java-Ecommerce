@@ -1,5 +1,7 @@
 package com.example.ecommerce.dto;
 
+import com.example.ecommerce.entity.Rol;
+
 public class LoginResponse {
 
     private String token;
@@ -7,21 +9,19 @@ public class LoginResponse {
     private Long id;
     private String username;
     private String email;
-    private String role;
-    private String message;
+    private Rol role;
+    private Boolean activo_login;
 
     // Constructor existente
-    public LoginResponse(String token, Long id, String username, String email, String role) {
+    public LoginResponse(String token, Long id, String username, String email, Rol role1, Boolean activoLogin) {
         this.token = token;
         this.id = id;
         this.username = username;
         this.email = email;
-        this.role = role;
+        this.role = role1;
+        activo_login = activoLogin;
     }
-    public LoginResponse(String token, String message) {
-        this.token = token;
-        this.message = message;
-    }
+
 
     // Getters y setters
     public String getToken() {
@@ -64,17 +64,22 @@ public class LoginResponse {
         this.email = email;
     }
 
-    public String getRole() {
+
+
+
+    public Rol getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Rol role) {
         this.role = role;
     }
-    public String getMessage() {
-        return message;
+
+    public Boolean getActivo_login() {
+        return activo_login;
     }
-    public void setMessage(String message) {
-        this.message = message;
+
+    public void setActivo_login(Boolean activo_login) {
+        this.activo_login = activo_login;
     }
 }

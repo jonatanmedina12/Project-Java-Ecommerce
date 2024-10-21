@@ -43,7 +43,7 @@ public class InventarioService {
         Inventario inventario = new Inventario();
         inventario.setProducto(producto);
         inventario.setCantidad(inventarioDTO.getCantidad());
-
+        inventario.setUbicacion(inventarioDTO.getUbicacion());
         inventario = inventarioRepository.save(inventario);
         return convertirADTO(inventario);
     }
@@ -55,6 +55,8 @@ public class InventarioService {
 
         inventario.setCantidad(inventarioDTO.getCantidad());
         inventario = inventarioRepository.save(inventario);
+        inventario.setUbicacion(inventarioDTO.getUbicacion());
+
         return convertirADTO(inventario);
     }
 
@@ -93,7 +95,8 @@ public class InventarioService {
                 inventario.getId(),
                 inventario.getProducto().getId(),
                 inventario.getProducto().getNombre(),
-                inventario.getCantidad()
+                inventario.getCantidad(),
+                inventario.getUbicacion()
         );
     }
 }

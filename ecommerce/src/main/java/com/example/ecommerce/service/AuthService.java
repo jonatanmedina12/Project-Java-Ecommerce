@@ -1,9 +1,14 @@
 package com.example.ecommerce.service;
 
+import com.example.ecommerce.controller.AuthController;
 import com.example.ecommerce.dto.LoginRequest;
 import com.example.ecommerce.dto.LoginResponse;
+import com.example.ecommerce.dto.ResetPasswordDTO;
+import com.example.ecommerce.dto.ValidarEmail;
+import com.example.ecommerce.entity.Usuario;
 import com.example.ecommerce.security.JwtUtils;
-import io.jsonwebtoken.Claims;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,6 +23,8 @@ import org.springframework.stereotype.Service;
 @Service
 
 public class AuthService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -33,18 +40,35 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest loginRequest) {
         try {
+            Usuario usuario = usuarioService.obtenerUsuarioEmail(loginRequest.getEmail());
+            logger.info("validando informacion: " + usuario.getUsername());
+
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+                    new UsernamePasswordAuthenticationToken(usuario.getUsername(), loginRequest.getPassword())
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
-            String jwt = jwtUtils.generateToken(userDetails);
-            usuarioService.loginUsuarioDTO(loginRequest.getUsername());
+            String username=usuario.getUsername();
+            logger.info("validando acaa 222222: " + username);
 
-            return new LoginResponse(jwt, "Login successful");
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            String jwt = jwtUtils.generateToken(userDetails);
+
+            return new LoginResponse(jwt,usuario.getId(),usuario.getUsername(),usuario.getEmail(),usuario.getRol(),usuario.isActivoLogin() );
         } catch (BadCredentialsException e) {
-            throw new AuthenticationException("Invalid username or password", e) {
+            throw new AuthenticationException("Invalid email or password", e) {
+            };
+        }
+    }
+    public String inicioSesion(String username) {
+        try {
+            usuarioService.inciarSesion(username);
+
+
+
+            return "Ok";
+        } catch (BadCredentialsException e) {
+            throw new AuthenticationException("Invalid inicio", e) {
             };
         }
     }
@@ -53,12 +77,8 @@ public class AuthService {
         try {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(Username);
 
-            if (jwtUtils.validateToken(refreshToken, userDetails)) {
-                return jwtUtils.generateToken(userDetails);
+            return jwtUtils.generateToken(userDetails);
 
-            }else {
-                throw new RuntimeException("Invalid refresh token");
-            }
 
 
         } catch (Exception e) {
@@ -66,4 +86,56 @@ public class AuthService {
         }
     }
 
+    public boolean logout(String Username) {
+        try {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(Username);
+
+            if (userDetails != null) {
+                String username = userDetails.getUsername();
+                usuarioService.cerrarSesion(username);
+                return true;
+            }else {
+
+                throw new RuntimeException("Error logout");
+            }
+
+
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error logout: " + e.getMessage());
+        }
+
+    }
+    public void resetPassword(ResetPasswordDTO resetPasswordDTO) {
+        try {
+
+            if (resetPasswordDTO != null) {
+
+                usuarioService.cambiarContrasena(resetPasswordDTO);
+
+            }else {
+                throw new RuntimeException("Error reset password");
+            }
+
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error logout: " + e.getMessage());
+        }
+    }
+    public boolean validarEmail(ValidarEmail validarEmail) {
+        try {
+
+            if (validarEmail != null) {
+
+               return usuarioService.validarEmail(validarEmail);
+
+            }else {
+                throw new RuntimeException("Error reset password");
+            }
+
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error logout: " + e.getMessage());
+        }
+    }
 }
