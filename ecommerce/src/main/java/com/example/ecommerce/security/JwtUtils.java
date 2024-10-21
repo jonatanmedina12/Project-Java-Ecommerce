@@ -24,6 +24,11 @@ public class JwtUtils implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+    //@Value("${jwt.token.validity:120}") // 2 minutes by default
+    //private long JWT_TOKEN_VALIDITY;
+
+    @Value("${jwt.testing.mode:false}")
+    private boolean JWT_TESTING_MODE;
 
     @Value("${jwt.secret}")
     private String secret;
@@ -63,6 +68,10 @@ public class JwtUtils implements Serializable {
     }
 
     private String doGenerateToken(Map<String, Object> claims, String subject) {
+        long expirationTime = JWT_TESTING_MODE ?
+                120 * 1000 : // 2 minutes in milliseconds for testing
+                JWT_TOKEN_VALIDITY * 1000; // Convert seconds to milliseconds for production
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
