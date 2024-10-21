@@ -1,12 +1,22 @@
 package com.example.ecommerce.controller;
 
+import com.example.ecommerce.dto.UsernameDto;
 import com.example.ecommerce.dto.UsuarioDTO;
+import com.example.ecommerce.dto.UsuarioUpdateDto;
 import com.example.ecommerce.exception.UserValidationException;
 import com.example.ecommerce.service.UsuarioService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -14,6 +24,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
+    private static final Logger logger = LoggerFactory.getLogger(UsuarioController.class);
+    private static final String UPLOAD_DIR = "uploads";
 
     @Autowired
     private UsuarioService usuarioService;
@@ -57,6 +69,49 @@ public class UsuarioController {
         try {
             UsuarioDTO usuarioActualizado = usuarioService.actualizarUsuario(id, usuarioDTO);
             return ResponseEntity.ok(usuarioActualizado);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+    @PutMapping("/actualizarUsuario")
+    public ResponseEntity<?> actualizarUsuario(@ModelAttribute UsuarioUpdateDto usuarioDTO) {
+        try {
+            String fileName = null;
+            if (usuarioDTO.getPhoto() != null && !usuarioDTO.getPhoto().isEmpty()) {
+                fileName = saveFile(usuarioDTO.getPhoto());
+            }
+
+            boolean updated = usuarioService.actualizarUsuarioUsername(usuarioDTO, fileName);
+            if (updated) {
+                return ResponseEntity.ok(updated);
+            } else {
+                return ResponseEntity.ok("No se realizaron cambios en el usuario");
+            }
+        } catch (IOException e) {
+            return new ResponseEntity<>("Error al procesar la imagen"+e, HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+    private String saveFile(MultipartFile file) throws IOException {
+        Path uploadPath = Paths.get(UPLOAD_DIR);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        Path filePath = uploadPath.resolve(fileName);
+        Files.copy(file.getInputStream(), filePath);
+
+        return fileName;
+    }
+    @PostMapping("/usuario")
+    public ResponseEntity<UsuarioDTO> obtenerUsuario( @RequestBody UsernameDto username) {
+        try {
+            logger.info("dos: " + username.getUsername());
+
+            UsuarioDTO usuario = usuarioService.obtenerUsuarioUsername(username.getUsername());
+            return ResponseEntity.ok(usuario);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

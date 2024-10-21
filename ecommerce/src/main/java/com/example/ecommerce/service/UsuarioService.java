@@ -1,8 +1,6 @@
 package com.example.ecommerce.service;
 
-import com.example.ecommerce.dto.ResetPasswordDTO;
-import com.example.ecommerce.dto.UsuarioDTO;
-import com.example.ecommerce.dto.ValidarEmail;
+import com.example.ecommerce.dto.*;
 import com.example.ecommerce.entity.Rol;
 import com.example.ecommerce.entity.Usuario;
 import com.example.ecommerce.repository.OrdenRepository;
@@ -113,6 +111,12 @@ public class UsuarioService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         return convertToDTO(usuario);
     }
+    @Transactional(readOnly = true)
+    public UsuarioDTO obtenerUsuarioUsername(String username) {
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        return convertToDTO(usuario);
+    }
 
     @Transactional
     public Usuario obtenerUsuarioEmail(String email) {
@@ -152,6 +156,35 @@ public class UsuarioService {
         usuario = usuarioRepository.save(usuario);
         return convertToDTO(usuario);
     }
+    @Transactional
+    public boolean actualizarUsuarioUsername(UsuarioUpdateDto usuarioDTO, String fileName) {
+        Usuario usuario = usuarioRepository.findByUsername(usuarioDTO.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        boolean isUpdated = false;
+
+        if (usuarioDTO.getUsername() != null && !usuarioDTO.getUsername().equals(usuario.getUsername())) {
+            usuario.setUsername(usuarioDTO.getUsername());
+            isUpdated = true;
+        }
+
+        if (usuarioDTO.getEmail() != null && !usuarioDTO.getEmail().equals(usuario.getEmail())) {
+            usuario.setEmail(usuarioDTO.getEmail());
+            isUpdated = true;
+        }
+
+        if (fileName != null) {
+            usuario.setFoto("/uploads/" + fileName);
+            isUpdated = true;
+        }
+
+        if (isUpdated) {
+            usuario.setUpdate_on(LocalDateTime.now());
+            usuarioRepository.save(usuario);
+        }
+
+        return isUpdated;
+    }
 
     @Transactional
     public void eliminarUsuario(Long id) {
@@ -179,13 +212,13 @@ public class UsuarioService {
     }
 
     private UsuarioDTO convertToDTO(Usuario usuario) {
-        UsuarioDTO dto = new UsuarioDTO();
-        dto.setId(usuario.getId());
-        dto.setUsername(usuario.getUsername());
-        dto.setEmail(usuario.getEmail());
-        dto.setActivo(usuario.isActivo());
-        dto.setRol(usuario.getRol().name());
-
-        return dto;
+        return new UsuarioDTO(
+                usuario.getId(),
+                usuario.getUsername(),
+                usuario.getEmail(),
+                usuario.isActivo(),
+                usuario.getRol().name(),
+                usuario.getFoto()
+        );
     }
 }

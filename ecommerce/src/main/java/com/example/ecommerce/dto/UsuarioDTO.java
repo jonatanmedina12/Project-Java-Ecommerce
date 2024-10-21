@@ -8,17 +8,17 @@ public class UsuarioDTO {
     private boolean activo;
     private String rol;
     private Long totalOrdenes; // Para el reporte de clientes frecuentes
+    private String photo;
 
-    // Constructor por defecto
-    public UsuarioDTO() {}
 
     // Constructor con todos los campos (excepto password y totalOrdenes)
-    public UsuarioDTO(Long id, String username, String email, boolean activo, String rol) {
+    public UsuarioDTO(Long id, String username, String email, boolean activo, String rol, String photo) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.activo = activo;
         this.rol = rol;
+        this.photo = photo;
     }
 
     // Getters y setters
@@ -88,5 +88,13 @@ public class UsuarioDTO {
                 ", rol='" + rol + '\'' +
                 ", totalOrdenes=" + totalOrdenes +
                 '}';
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 }

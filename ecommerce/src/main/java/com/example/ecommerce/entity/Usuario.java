@@ -3,6 +3,7 @@ import  jakarta.persistence.*;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "usuarios")
@@ -23,7 +24,8 @@ public class Usuario {
     private boolean activoLogin;
     @Enumerated(EnumType.STRING)
     private Rol rol;
-
+    @OneToMany(mappedBy = "usuario")
+    private List<Orden> ordenes;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
