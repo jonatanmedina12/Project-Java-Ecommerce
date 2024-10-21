@@ -46,12 +46,12 @@ public class InventarioController {
     }
 
     @PutMapping("/{productoId}/actualizar-stock")
-    public ResponseEntity<String> actualizarStock(@PathVariable Long productoId, @RequestParam int cantidad) {
+    public ResponseEntity<Boolean> actualizarStock(@PathVariable Long productoId, @RequestParam int cantidad) {
         boolean actualizado = inventarioService.actualizarStock(productoId, cantidad);
         if (actualizado) {
-            return new ResponseEntity<>("Stock actualizado con éxito", HttpStatus.OK);
+            return new ResponseEntity<>(actualizado, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>("No se pudo actualizar el stock", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
         }
     }
 

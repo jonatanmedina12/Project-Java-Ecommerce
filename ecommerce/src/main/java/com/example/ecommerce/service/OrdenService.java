@@ -1,8 +1,6 @@
 package com.example.ecommerce.service;
 
-import com.example.ecommerce.dto.DetalleOrdenDTO;
-import com.example.ecommerce.dto.EstadisticasOrdenDTO;
-import com.example.ecommerce.dto.OrdenDTO;
+import com.example.ecommerce.dto.*;
 import com.example.ecommerce.entity.*;
 import com.example.ecommerce.exception.ResourceNotFoundException;
 import com.example.ecommerce.repository.InventarioRepository;
@@ -205,12 +203,24 @@ public class OrdenService {
         return descuento;
     }
 
-    private boolean esClienteFrecuente(Long usuarioId) {
+    public boolean esClienteFrecuente(Long usuarioId) {
         List<Object[]> topClientes = ordenRepository.findTopCustomers();
         return topClientes.stream()
                 .limit(5)
                 .anyMatch(cliente -> cliente[0].equals(usuarioId));
     }
+    public List<ClienteFrecuenteDTO> obtenerClientesFrecuentes() {
+        List<Object[]> topClientes = ordenRepository.findTopUsers();
+        return topClientes.stream()
+                .limit(5)
+                .map(cliente -> new ClienteFrecuenteDTO(
+                        (Long) cliente[0],
+                        (String) cliente[1],
+                        (Long) cliente[2],
+                        (BigDecimal) cliente[3]))
+                .collect(Collectors.toList());
+    }
+
 
     private void actualizarInventario(List<DetalleOrden> detalles) {
         for (DetalleOrden detalle : detalles) {
@@ -289,7 +299,21 @@ public class OrdenService {
                 orden.getEstado().name()
         );
     }
+    public List<ProductoDTO> getProductosActivos() {
+        return productoRepository.findByActivoTrue().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+    private ProductoDTO convertToDTO(Producto producto) {
+        return  new ProductoDTO(
+                producto.getId(),
+                producto.getNombre(),
+                producto.getDescripcion(),
+                producto.getPrecio(),
+                producto.isActivo()
+        );
 
+    }
     private DetalleOrdenDTO convertToDetalleDTO(DetalleOrden detalle) {
         return new DetalleOrdenDTO(
                 detalle.getId(),
