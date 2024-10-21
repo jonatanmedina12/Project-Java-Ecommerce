@@ -191,6 +191,8 @@ Este comando construirá la imagen de la aplicación (si es necesario) e iniciar
 - Para entornos de producción, considera usar secretos de Docker para manejar información sensible como contraseñas.
 - Ajusta la configuración de Docker y Docker Compose según las necesidades específicas de tu entorno y aplicación.
 
+## Video
+- https://youtu.be/iZeokLvRZbU
 
 ## Licencia
 
